@@ -11,20 +11,24 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-      
+    
     steps:
       - name: Get the code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-        
+    
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          
+    
       - name: Run Danger
-        run: bundle exec danger ci --base="${{ github.event.pull_request.base.ref }}" --head="${{ github.event.pull_request.head.ref }}"
+        run: |
+          bundle exec danger ci \
+            --base="${{ github.event.pull_request.base.ref }}" \
+            --head="${{ github.event.pull_request.head.ref }}" \
+            --fail-if-no-pr=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
