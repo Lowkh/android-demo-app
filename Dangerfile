@@ -1,4 +1,4 @@
-# Danger - Automated Code Review for Android
+# Danger - Automated Code Review
 
 message("👋 Thanks for your pull request!")
 
@@ -13,8 +13,9 @@ if !pr_title.start_with?("feat:") && !pr_title.start_with?("fix:") && !pr_title.
   warn("⚠️ PR title should start with: feat:, fix:, or test:")
 end
 
-# Get all changed files
-all_files = git.modified_files + git.created_files
+# Get changed files (use 'files' not 'created_files')
+changed_files = git.modified_files
+all_files = changed_files + (git.added_files || [])
 
 # Count changes
 additions = github.pr_additions
