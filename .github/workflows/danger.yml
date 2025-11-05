@@ -23,6 +23,6 @@ jobs:
           bundler-cache: true
           
       - name: Run Danger
-        run: bundle exec danger ci
+        run: bundle exec danger
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
