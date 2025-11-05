@@ -13,18 +13,10 @@ if !pr_title.start_with?("feat:") && !pr_title.start_with?("fix:") && !pr_title.
   warn("⚠️ PR title should start with: feat:, fix:, or test:")
 end
 
-# Get changed files (use 'files' not 'created_files')
+# Get changed files
 changed_files = git.modified_files
-all_files = changed_files + (git.added_files || [])
-
-# Count changes
-additions = github.pr_additions
-deletions = github.pr_deletions
-
-# Check if PR is too big
-if additions + deletions > 300
-  warn("⚠️ This is a large PR - consider breaking into smaller PRs")
-end
+added_files = git.added_files || []
+all_files = changed_files + added_files
 
 # Count file types
 kotlin_files = all_files.select { |f| f.end_with?('.kt') }
@@ -42,8 +34,6 @@ markdown <<~MARKDOWN
   | What | Count |
   |------|-------|
   | Files Changed | #{all_files.count} |
-  | Lines Added | #{additions} |
-  | Lines Deleted | #{deletions} |
   | Kotlin Files | #{kotlin_files.count} |
   | Test Files | #{test_files.count} |
 MARKDOWN
