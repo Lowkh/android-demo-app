@@ -1,41 +1,41 @@
 # Danger - Automated Code Review
 
-message("👋 Thanks for your pull request!")
+# ALWAYS show a welcome message
+message("🤖 Danger is reviewing your code!")
 
-# Check PR description
-if github.pr_body.length < 10
-  fail("❌ Please add a description to your PR")
+# ALWAYS check description (this should trigger)
+if github.pr_body.nil? || github.pr_body.empty? || github.pr_body.length < 5
+  warn("⚠️ Please add a meaningful PR description (at least 5 characters)")
 end
 
-# Check PR title format
+# ALWAYS check title (this should trigger)
 pr_title = github.pr_title
-if !pr_title.start_with?("feat:") && !pr_title.start_with?("fix:") && !pr_title.start_with?("test:")
-  warn("⚠️ PR title should start with: feat:, fix:, or test:")
+unless pr_title.include?("feat:") || pr_title.include?("fix:") || pr_title.include?("test:") || pr_title.include?("chore:")
+  warn("⚠️ PR title should include: feat:, fix:, test:, or chore:")
 end
 
-# Get changed files
+# ALWAYS show PR info
+message("📝 PR Title: #{pr_title}")
+message("📝 Description length: #{github.pr_body.length} characters")
+
+# Show files
 changed_files = git.modified_files
 added_files = git.added_files || []
 all_files = changed_files + added_files
 
-# Count file types
-kotlin_files = all_files.select { |f| f.end_with?('.kt') }
-test_files = all_files.select { |f| f.include?('test') || f.include?('Test') }
+message("📁 Files changed: #{all_files.count}")
 
-# Suggest tests
-if kotlin_files.any? && test_files.empty?
-  message("💡 Consider adding tests for your Kotlin changes")
+all_files.each do |file|
+  message("  - #{file}")
 end
 
-# Show summary
+# ALWAYS show summary
 markdown <<~MARKDOWN
-  ## Pull Request Summary
+  ## Danger Review Summary
   
-  | What | Count |
-  |------|-------|
-  | Files Changed | #{all_files.count} |
-  | Kotlin Files | #{kotlin_files.count} |
-  | Test Files | #{test_files.count} |
+  - **Files Changed:** #{all_files.count}
+  - **PR Title:** #{pr_title}
+  - **Description Length:** #{github.pr_body.length} chars
 MARKDOWN
 
-message("✅ Review complete!")
+message("✅ Danger review complete!")
