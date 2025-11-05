@@ -1,42 +1,50 @@
-# This is a Danger review file
+# Danger - Automated Code Review for Android
 
-# Welcome message
-message("Thanks for contributing!")
+message("👋 Thanks for your pull request!")
 
-# Rule 1: Check if description is long enough
+# Check PR description
 if github.pr_body.length < 10
-  fail("Please write a description for your changes")
+  fail("❌ Please add a description to your PR")
 end
 
-# Rule 2: Check if title has proper format
-title = github.pr_title
-if !title.include?("feat:") && !title.include?("fix:") && !title.include?("test:")
-  warn("Title should start with feat: or fix: or test:")
+# Check PR title format
+pr_title = github.pr_title
+if !pr_title.start_with?("feat:") && !pr_title.start_with?("fix:") && !pr_title.start_with?("test:")
+  warn("⚠️ PR title should start with: feat:, fix:, or test:")
 end
 
-# Rule 3: Warn if changes are too big
-additions = git.added_lines
-deletions = git.deleted_lines
-total = additions + deletions
+# Get all changed files
+all_files = git.modified_files + git.created_files
 
-if total > 300
-  warn("This is a large change - consider making it smaller")
+# Count changes
+additions = github.pr_additions
+deletions = github.pr_deletions
+
+# Check if PR is too big
+if additions + deletions > 300
+  warn("⚠️ This is a large PR - consider breaking into smaller PRs")
 end
 
-# Rule 4: Check if tests are included
-files = git.modified_files + git.created_files
-has_kotlin = files.any? { |f| f.include?(".kt") }
-has_test = files.any? { |f| f.include?("test") }
+# Count file types
+kotlin_files = all_files.select { |f| f.end_with?('.kt') }
+test_files = all_files.select { |f| f.include?('test') || f.include?('Test') }
 
-if has_kotlin && !has_test
-  message("Did you consider adding a test?")
+# Suggest tests
+if kotlin_files.any? && test_files.empty?
+  message("💡 Consider adding tests for your Kotlin changes")
 end
 
-# Summary table
-markdown <<~TEXT
-| What | Count |
-|------|-------|
-| Files Changed | #{files.count} |
-| Lines Added | #{additions} |
-| Lines Deleted | #{deletions} |
-TEXT
+# Show summary
+markdown <<~MARKDOWN
+  ## Pull Request Summary
+  
+  | What | Count |
+  |------|-------|
+  | Files Changed | #{all_files.count} |
+  | Lines Added | #{additions} |
+  | Lines Deleted | #{deletions} |
+  | Kotlin Files | #{kotlin_files.count} |
+  | Test Files | #{test_files.count} |
+MARKDOWN
+
+message("✅ Review complete!")
