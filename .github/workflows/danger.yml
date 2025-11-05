@@ -2,6 +2,7 @@ name: Danger Check
 
 on:
   pull_request:
+    types: [opened, edited, synchronize, reopened]
 
 jobs:
   danger:
@@ -9,16 +10,21 @@ jobs:
     
     permissions:
       pull-requests: write
+      contents: read
       
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
           
-      - run: npm install -D danger
-      
-      - run: npx danger ci
+      - name: Install Danger
+        run: npm install -D danger
+        
+      - name: Run Danger
+        run: npx danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
