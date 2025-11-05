@@ -1,27 +1,31 @@
 name: Danger Check
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
 
 jobs:
   danger:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     
     permissions:
       pull-requests: write
       contents: read
       issues: write
-      statuses: write
       
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         
-      - uses: ruby/setup-ruby@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
           
-      - name: Danger
-        run: |
-          export DANGER_GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
-          bundle exec danger pr https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+      - name: Run Danger
+        run: bundle exec danger pr https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
