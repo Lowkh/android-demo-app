@@ -15,8 +15,8 @@ if !title.include?("feat:") && !title.include?("fix:") && !title.include?("test:
 end
 
 # Rule 3: Warn if changes are too big
-additions = github.pr_additions
-deletions = github.pr_deletions
+additions = github.pr_additions_count
+deletions = github.pr_deletions_count
 total = additions + deletions
 
 if total > 300
